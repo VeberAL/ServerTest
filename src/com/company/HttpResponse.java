@@ -24,7 +24,7 @@ public class HttpResponse {
     public String message(){
         StringBuilder builder = new StringBuilder();
 
-          builder.append("HTTP/1.1 ")
+          builder.append("HTTP/1.1 ")   //версия протокола
                  .append(statusCode)
                  .append(" ")
                  .append(status)
@@ -36,10 +36,42 @@ public class HttpResponse {
                       .append(entry.getValue())
                       .append(NEW_LINE);
           }
-
+          //отделение headers от тела документов
           return builder
                   .append(NEW_LINE)
                   .append(body)
                   .toString();
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+    public byte[] getBytes() {
+        return message().getBytes();
+    }
+    //геттеры и сеттеры
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.headers.put("Content-Length", String.valueOf(body.length()));
+        this.body = body;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

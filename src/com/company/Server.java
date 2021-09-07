@@ -18,12 +18,6 @@ class Server {
     private AsynchronousServerSocketChannel server;
 
     private final HttpHandler handler;
-    private final static String HEADERS =
-            "HTTP/1.1 200 OK\n" +
-                    "Server: test\n" +
-                    "Content-Type: text/html\n" +
-                    "Content-Length: %s\n" +
-                    "Connection: close\n\n";
 
     Server(HttpHandler handler) {
         this.handler = handler;
@@ -73,10 +67,24 @@ class Server {
             }
             HttpRequest request = new HttpRequest(builder.toString());
             HttpResponse response = new HttpResponse();
-            String body = this.handler.handle(request, response);
-            String page = String.format(HEADERS, body.length()) + body;
 
-            ByteBuffer resp = ByteBuffer.wrap(page.getBytes());
+            //проверка что handler установлен
+            if (handler != null) {
+                String body = this.handler.handle(request, response);
+                if (body != null && !body.isBlank()){
+                    if (response.getHeaders().get("Content-Type") == null){
+                        response.addHeader("Content-Type: text/html", "text/html; charset=utf-8");
+                    }
+                    response.setBody(body);
+                }
+
+            } else {
+                response.setStatusCode(404);
+                response.setStatus("Not found");
+                response.addHeader("Content-Type: text/html", "text/html; charset=utf-8");
+                response.setBody("<html><body><h1>Resource not found</h1></body></html>");
+            }
+            ByteBuffer resp = ByteBuffer.wrap(response.getBytes());
             clientChannel.write(resp);
             clientChannel.close();
         }
