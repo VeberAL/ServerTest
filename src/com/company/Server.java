@@ -70,12 +70,20 @@ class Server {
 
             //проверка что handler установлен
             if (handler != null) {
-                String body = this.handler.handle(request, response);
-                if (body != null && !body.isBlank()){
-                    if (response.getHeaders().get("Content-Type") == null){
-                        response.addHeader("Content-Type: text/html", "text/html; charset=utf-8");
+                try {
+                    String body = this.handler.handle(request, response);
+                    if (body != null && !body.isBlank()){
+                        if (response.getHeaders().get("Content-Type") == null){
+                            response.addHeader("Content-Type: text/html", "text/html; charset=utf-8");
+                        }
+                        response.setBody(body);
                     }
-                    response.setBody(body);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.setStatusCode(500);
+                    response.setStatus("Internal server error");
+                    response.addHeader("Content-Type: text/html", "text/html; charset=utf-8");
+                    response.setBody("<html><body><h1>Error happens</h1></body></html>");
                 }
 
             } else {
